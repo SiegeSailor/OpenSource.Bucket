@@ -1,23 +1,30 @@
-version: "3.8"
+networks:
+  bridge:
+    driver: bridge
 
 services:
-  web:
+  flask:
     build: .
-    command: flask run --host=0.0.0.0 --port=5000
+    command: flask run --host=0.0.0.0 --port=5000 --debug
+    networks:
+      - bridge
     volumes:
       - ./source/:/source/
-    ports:
-      - "5000:5000"
     environment:
       FLASK_ENV: development
+      FLASK_APP: main
+    ports:
+      - 5001:5000
     depends_on:
       - localstack
 
   localstack:
+    networks:
+      - bridge
     image: localstack/localstack
-    ports:
-      - "4566:4566"
-      - "4571:4571"
     environment:
       - SERVICES=s3
       - DOCKER_HOST=unix:///var/run/docker.sock
+    ports:
+      - 4566:4566
+      - 4571:4571

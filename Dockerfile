@@ -5,8 +5,8 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /source/
 
-COPY ./requirements.txt /source/
+COPY ./requirements.txt /source/requirements.txt
 
-RUN pip install --no-cache-dir --requirements requirements.txt
+RUN pip install --no-cache-dir --requirement ./requirements.txt
 
-COPY . /source/
+COPY ./source/ /source/
