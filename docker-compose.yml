@@ -11,20 +11,33 @@ services:
     volumes:
       - ./source/:/source/
     environment:
-      FLASK_ENV: development
-      FLASK_APP: main
+      - FLASK_ENV=development
+      - FLASK_APP=main
     ports:
       - 5001:5000
     depends_on:
       - localstack
+    healthcheck:
+      test: ["CMD", "curl", "http://127.0.0.1:5000"]
 
   localstack:
+    image: localstack/localstack
     networks:
       - bridge
-    image: localstack/localstack
+    volumes:
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
+      - DEBUG=1
+      - DEFAULT_REGION=us-east-1
+      - EDGE_PORT=4566
+      - PERSISTENCE=1
       - SERVICES=s3
-      - DOCKER_HOST=unix:///var/run/docker.sock
+      - SNAPSHOT_FLUSH_INTERVAL=15
+      - SNAPSHOT_LOAD_STRATEGY=ON_REQUESTED
+      - SNAPSHOT_SAVE_STRATEGY=SCHEDULED
     ports:
       - 4566:4566
-      - 4571:4571
+      - 4510-4559:4510-4559
+    healthcheck:
+      test: ["CMD", "curl", "http://127.0.0.1:4566"]
