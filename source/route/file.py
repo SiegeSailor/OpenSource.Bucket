@@ -2,14 +2,15 @@
 This module contains the routes for file operations.
 """
 
-import logging
-
 import botocore
 import config
 import decorators
 import flask
 
 blueprint = flask.Blueprint("file", __name__, url_prefix="/file")
+# 1. Set newly created bucket CORS
+# 2. Presigned URL for file upload
+# 3. Presigned POST for file upload
 
 
 @blueprint.route("/<bucket>", methods=["POST"])
@@ -25,11 +26,26 @@ def upload(bucket: str):
         return "File is not provided.", 400
 
     try:
-        config.s3.head_bucket(Bucket=bucket)
+        config.s3_client.head_bucket(Bucket=bucket)
     except botocore.exceptions.ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            config.s3.create_bucket(Bucket=bucket)
-            logging.info(
+            config.s3_client.create_bucket(Bucket=bucket)
+            config.s3_client.put_bucket_cors(
+                Bucket=bucket,
+                ExpectedBucketOwner=config.AWS_ACCOUNT_ID,
+                CORSConfiguration={
+                    "CORSRules": [
+                        {
+                            "AllowedHeaders": ["*"],
+                            "AllowedMethods": ["GET", "POST", "HEAD", "PUT"],
+                            "AllowedOrigins": ["*"],
+                            "ExposeHeaders": ["ETag"],
+                            "MaxAgeSeconds": 3600,
+                        }
+                    ]
+                },
+            )
+            config.logs_logger.info(
                 "%s created bucket %s.",
                 flask.request.remote_addr,
                 bucket,
@@ -37,15 +53,32 @@ def upload(bucket: str):
         else:
             raise
 
-    config.s3.upload_fileobj(file, bucket, file.filename)
-    logging.info(
-        "%s Uploaded file %s to bucket %s.",
+    config.s3_client.upload_fileobj(file, bucket, file.filename)
+    config.logs_logger.info(
+        "%s uploaded file %s to bucket %s.",
         flask.request.remote_addr,
         file.filename,
         bucket,
     )
 
-    return "Uploaded file successfully.", 201
+    url = config.s3_client.generate_presigned_url(
+        ClientMethod="put_object",
+        Params={
+            "Bucket": bucket,
+            "Key": file.filename,
+            "ContentType": file.content_type,
+        },
+        ExpiresIn=3600 * 24,
+    )
+    config.logs_logger.info(
+        "%s generated presigned URL %s for file %s in bucket %s.",
+        flask.request.remote_addr,
+        url,
+        file.filename,
+        bucket,
+    )
+
+    return "Uploaded file successfully.", 201, {"location": url}
 
 
 @blueprint.route("/<bucket>/<filename>", methods=["GET"])
@@ -57,14 +90,14 @@ def download(bucket, filename):
 
     path_file = f"/{bucket}/{filename}"
     try:
-        config.s3.download_file(bucket, filename, path_file)
+        config.s3_client.download_file(bucket, filename, path_file)
     except botocore.exceptions.ClientError as error:
         if error.response["Error"]["Code"] == "404":
             return f"File {filename} not found in {bucket}.", 404
 
         raise
-    logging.info(
-        "%s Downloaded file %s from bucket %s.",
+    config.logs_logger.info(
+        "%s downloaded file %s from bucket %s.",
         flask.request.remote_addr,
         filename,
         bucket,
@@ -80,9 +113,9 @@ def delete(bucket, filename):
     Deletes a file from the specified bucket.
     """
 
-    config.s3.delete_object(Bucket=bucket, Key=filename)
-    logging.info(
-        "%s Deleted file %s from bucket %s.",
+    config.s3_client.delete_object(Bucket=bucket, Key=filename)
+    config.logs_logger.info(
+        "%s deleted file %s from bucket %s.",
         flask.request.remote_addr,
         filename,
         bucket,
