@@ -1,3 +1,6 @@
+x-environment: &environment
+  DEFAULT_REGION: us-east-1
+
 networks:
   bridge:
     driver: bridge
@@ -11,8 +14,17 @@ services:
     volumes:
       - ./source/:/source/
     environment:
-      - FLASK_ENV=development
-      - FLASK_APP=main
+      <<: *environment
+      AWS_ACCESS_KEY_ID: dummy
+      AWS_ACCOUNT_ID: 000000000000
+      AWS_CLOUD_WATCH_LOGS_ENDPOINT: http://localstack:4566
+      AWS_S3_ENDPOINT: http://localstack:4566
+      AWS_SECRET_ACCESS_KEY: dummy
+      AWS_SESSION_TOKEN: dummy
+      AWS_CLOUD_WATCH_LOGS_LOG_GROUP: group
+      AWS_CLOUD_WATCH_LOGS_LOG_STREAM: stream
+      FLASK_APP: main
+      FLASK_ENV: development
     ports:
       - 5001:5000
     depends_on:
@@ -28,14 +40,18 @@ services:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     environment:
-      - DEBUG=1
-      - DEFAULT_REGION=us-east-1
-      - EDGE_PORT=4566
-      - PERSISTENCE=1
-      - SERVICES=s3
-      - SNAPSHOT_FLUSH_INTERVAL=15
-      - SNAPSHOT_LOAD_STRATEGY=ON_REQUESTED
-      - SNAPSHOT_SAVE_STRATEGY=SCHEDULED
+      <<: *environment
+      ACTIVATE_PRO: 0
+      DEBUG: 1
+      DOCKER_HOST: unix:///var/run/docker.sock
+      DOCKER_SOCK: /var/run/docker.sock
+      EDGE_PORT: 4566
+      LOCALSTACK_AUTH_TOKEN: ls-diHOjadA-jaNE-5267-CiHA-XiPayoFib930
+      PERSISTENCE: 1
+      SERVICES: s3,logs
+      SNAPSHOT_FLUSH_INTERVAL: 15
+      SNAPSHOT_LOAD_STRATEGY: ON_REQUESTED
+      SNAPSHOT_SAVE_STRATEGY: SCHEDULED
     ports:
       - 4566:4566
       - 4510-4559:4510-4559

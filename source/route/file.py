@@ -25,15 +25,20 @@ def upload(bucket: str):
         return "File is not provided.", 400
 
     try:
-        config.s3.upload_fileobj(file, bucket, file.filename)
-        logging.info(
-            "%s Uploaded file %s to bucket %s.",
-            flask.request.remote_addr,
-            file.filename,
-            bucket,
-        )
-    except botocore.exceptions.NoCredentialsError:
-        return "The credential for the bucket is not configured.", 500
+        config.s3.head_bucket(Bucket=bucket)
+    except botocore.exceptions.ClientError as error:
+        if error.response["Error"]["Code"] == "404":
+            config.s3.create_bucket(Bucket=bucket)
+        else:
+            raise
+
+    config.s3.upload_fileobj(file, bucket, file.filename)
+    logging.info(
+        "%s Uploaded file %s to bucket %s.",
+        flask.request.remote_addr,
+        file.filename,
+        bucket,
+    )
 
     return "Uploaded file successfully.", 201
 
@@ -45,18 +50,16 @@ def download(bucket, filename):
     Fetches a file from the specified bucket.
     """
 
-    try:
-        config.s3.download_file(bucket, filename, filename)
-        logging.info(
-            "%s Downloaded file %s from bucket %s.",
-            flask.request.remote_addr,
-            filename,
-            bucket,
-        )
+    path_file = f"/{bucket}/{filename}"
+    config.s3.download_file(bucket, filename, path_file)
+    logging.info(
+        "%s Downloaded file %s from bucket %s.",
+        flask.request.remote_addr,
+        filename,
+        bucket,
+    )
 
-        return "Downloaded file successfully.", 200
-    except Exception as error:
-        return str(error), 404
+    return flask.send_file(path_file, as_attachment=True), 200
 
 
 @blueprint.route("/<bucket>/<filename>", methods=["DELETE"])
@@ -66,15 +69,12 @@ def delete(bucket, filename):
     Deletes a file from the specified bucket.
     """
 
-    try:
-        config.s3.delete_object(Bucket=bucket, Key=filename)
-        logging.info(
-            "%s Deleted file %s from bucket %s.",
-            flask.request.remote_addr,
-            filename,
-            bucket,
-        )
+    config.s3.delete_object(Bucket=bucket, Key=filename)
+    logging.info(
+        "%s Deleted file %s from bucket %s.",
+        flask.request.remote_addr,
+        filename,
+        bucket,
+    )
 
-        return "Deleted file successfully.", 200
-    except Exception as error:
-        return str(error), 404
+    return "Deleted file successfully.", 200
