@@ -4,18 +4,16 @@ This module contains the routes for file operations.
 
 import botocore
 import config
+import controller
 import decorators
 import flask
 
 blueprint = flask.Blueprint("file", __name__, url_prefix="/file")
-# 1. Set newly created bucket CORS
-# 2. Presigned URL for file upload
-# 3. Presigned POST for file upload
 
 
 @blueprint.route("/<bucket>", methods=["POST"])
 @decorators.format_response
-def upload(bucket: str):
+def upload_file(bucket: str):
     """
     Uploads a file to the specified bucket.
     """
@@ -53,7 +51,7 @@ def upload(bucket: str):
         else:
             raise
 
-    config.s3_client.upload_fileobj(file, bucket, file.filename)
+    config.s3_client.upload_fileobj(Fileobj=file, Bucket=bucket, Key=file.filename)
     config.logs_logger.info(
         "%s uploaded file %s to bucket %s.",
         flask.request.remote_addr,
@@ -61,53 +59,30 @@ def upload(bucket: str):
         bucket,
     )
 
-    url = config.s3_client.generate_presigned_url(
-        ClientMethod="put_object",
-        HttpMethod="GET",
-        Params={
-            "Bucket": bucket,
-            "Key": file.filename,
-            "ContentType": file.content_type,
-        },
-        ExpiresIn=3600 * 24,
+    url = controller.file.generate_presigned_url(
+        bucket=bucket, filename=file.filename, content_type=file.content_type
     )
-    config.logs_logger.info(
-        "%s generated presigned URL %s for file %s in bucket %s.",
-        flask.request.remote_addr,
-        url,
-        file.filename,
-        bucket,
-    )
-
-    if config.ENVIRONMENT == "development":
-        url = url.replace("http://localstack", "http://127.0.0.1")
 
     return "Uploaded file successfully.", 201, {"location": url}
 
 
 @blueprint.route("/<bucket>/<filename>", methods=["GET"])
 @decorators.format_response
-def download(bucket, filename):
+def generate_url(bucket, filename):
     """
     Fetches a file from the specified bucket.
     """
 
-    path_file = f"/{bucket}/{filename}"
-    try:
-        config.s3_client.download_file(bucket, filename, path_file)
-    except botocore.exceptions.ClientError as error:
-        if error.response["Error"]["Code"] == "404":
-            return f"File {filename} not found in {bucket}.", 404
+    metadata = config.s3_client.head_object(Bucket=bucket, Key=filename)
 
-        raise
-    config.logs_logger.info(
-        "%s downloaded file %s from bucket %s.",
-        flask.request.remote_addr,
-        filename,
-        bucket,
+    url = controller.file.generate_presigned_url(
+        bucket=bucket, filename=filename, content_type=metadata["ContentType"]
     )
 
-    return flask.send_file(path_file, as_attachment=True), 200
+    if config.ENVIRONMENT == "development":
+        url = url.replace("http://localstack", "http://127.0.0.1")
+
+    return "Generated file URL successfully.", 200, {"location": url}
 
 
 @blueprint.route("/<bucket>/<filename>", methods=["DELETE"])
