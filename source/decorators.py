@@ -3,7 +3,6 @@ Decorators for the API.
 """
 
 import functools
-import logging
 
 import flask
 
@@ -16,15 +15,26 @@ def format_response(callback):
     @functools.wraps(callback)
     def inner(*args, **kwargs):
         try:
-            message, status = callback(*args, **kwargs)
-            return flask.jsonify({"message": message}), status
+            message, status, *data = callback(*args, **kwargs)
+            return (
+                flask.jsonify(
+                    {
+                        "message": message,
+                        "data": data[0] if data else {},
+                    }
+                ),
+                status,
+            )
         # pylint: disable=broad-exception-caught
         except Exception as error:
-            logging.error(
-                "%s encountered an error %s.",
-                flask.request.remote_addr,
-                error,
+            return (
+                flask.jsonify(
+                    {
+                        "message": "Failed to execute the operation.",
+                        "data": {"error": str(error)},
+                    }
+                ),
+                500,
             )
-            return flask.jsonify({"message": str(error)}), 500
 
     return inner
