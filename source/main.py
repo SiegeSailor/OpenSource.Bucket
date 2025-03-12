@@ -25,9 +25,9 @@ def check():
 
 @main.errorhandler(404)
 @decorators.format_response
-def fallback(error):
+def fallback(_):
     """
     Fallback route for handling 404 errors.
     """
 
-    return str(error), 404
+    return f"Route {flask.request.path} does not exist.", 404

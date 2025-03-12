@@ -16,13 +16,11 @@ def format_response(callback):
     def inner(*args, **kwargs):
         try:
             message, status, *data = callback(*args, **kwargs)
+            payload = {"message": message}
+            if data:
+                payload["data"] = data[0]
             return (
-                flask.jsonify(
-                    {
-                        "message": message,
-                        "data": data[0] if data else {},
-                    }
-                ),
+                flask.jsonify(payload),
                 status,
             )
         # pylint: disable=broad-exception-caught
@@ -30,8 +28,7 @@ def format_response(callback):
             return (
                 flask.jsonify(
                     {
-                        "message": "Failed to execute the operation.",
-                        "data": {"error": str(error)},
+                        "message": str(error),
                     }
                 ),
                 500,
