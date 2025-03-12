@@ -63,6 +63,7 @@ def upload(bucket: str):
 
     url = config.s3_client.generate_presigned_url(
         ClientMethod="put_object",
+        HttpMethod="GET",
         Params={
             "Bucket": bucket,
             "Key": file.filename,
@@ -77,6 +78,9 @@ def upload(bucket: str):
         file.filename,
         bucket,
     )
+
+    if config.ENVIRONMENT == "development":
+        url = url.replace("http://localstack", "http://127.0.0.1")
 
     return "Uploaded file successfully.", 201, {"location": url}
 
