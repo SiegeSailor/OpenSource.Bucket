@@ -29,6 +29,11 @@ def upload(bucket: str):
     except botocore.exceptions.ClientError as error:
         if error.response["Error"]["Code"] == "404":
             config.s3.create_bucket(Bucket=bucket)
+            logging.info(
+                "%s created bucket %s.",
+                flask.request.remote_addr,
+                bucket,
+            )
         else:
             raise
 
@@ -51,7 +56,13 @@ def download(bucket, filename):
     """
 
     path_file = f"/{bucket}/{filename}"
-    config.s3.download_file(bucket, filename, path_file)
+    try:
+        config.s3.download_file(bucket, filename, path_file)
+    except botocore.exceptions.ClientError as error:
+        if error.response["Error"]["Code"] == "404":
+            return f"File {filename} not found in {bucket}.", 404
+
+        raise
     logging.info(
         "%s Downloaded file %s from bucket %s.",
         flask.request.remote_addr,
