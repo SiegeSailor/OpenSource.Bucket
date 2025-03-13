@@ -1,5 +1,4 @@
 x-general: &general
-  DEFAULT_REGION: ${AWS_DEFAULT_REGION}
   ENVIRONMENT: ${ENVIRONMENT}
 
 networks:
@@ -9,7 +8,7 @@ networks:
 services:
   flask:
     build: .
-    command: flask run --host=0.0.0.0 --port=5000 --debug
+    command: flask run --host=0.0.0.0 --port=5000
     networks:
       - bridge
     volumes:
@@ -25,7 +24,7 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
       FLASK_APP: main:create_main
-      FLASK_ENV: ${ENVIRONMENT}
+      FLASK_DEBUG: 1
     ports:
       - 5001:5000
     depends_on:
@@ -45,6 +44,7 @@ services:
       <<: [*general]
       ACTIVATE_PRO: 0
       DEBUG: 1
+      DEFAULT_REGION: ${AWS_DEFAULT_REGION}
       DOCKER_HOST: unix:///var/run/docker.sock
       DOCKER_SOCK: /var/run/docker.sock
       EDGE_PORT: 4566

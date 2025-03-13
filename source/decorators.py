@@ -5,8 +5,8 @@ Decorators for the API.
 import functools
 
 import botocore
-import config
 import flask
+import service
 
 
 def format_response(callback):
@@ -27,7 +27,7 @@ def format_response(callback):
             )
         # pylint: disable=broad-exception-caught
         except botocore.exceptions.ClientError:
-            config.logs_logger.error(
+            service.logs_logger.error(
                 "%s encountered an error.",
                 flask.request.remote_addr,
                 exc_info=True,

@@ -7,6 +7,7 @@ import config
 import controller
 import decorators
 import flask
+import service
 
 blueprint = flask.Blueprint("file", __name__, url_prefix="/file")
 
@@ -24,13 +25,13 @@ def upload_file(bucket: str):
         return "File is not provided.", 400
 
     try:
-        config.s3_client.head_bucket(Bucket=bucket)
+        service.s3_client.head_bucket(Bucket=bucket)
     except botocore.exceptions.ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            config.s3_client.create_bucket(Bucket=bucket)
-            config.s3_client.put_bucket_cors(
+            service.s3_client.create_bucket(Bucket=bucket)
+            service.s3_client.put_bucket_cors(
                 Bucket=bucket,
-                ExpectedBucketOwner=config.AWS_ACCOUNT_ID,
+                ExpectedBucketOwner=config.Environment.AWS_ACCOUNT_ID,
                 CORSConfiguration={
                     "CORSRules": [
                         {
@@ -43,7 +44,7 @@ def upload_file(bucket: str):
                     ]
                 },
             )
-            config.logs_logger.info(
+            service.logs_logger.info(
                 "%s created bucket %s.",
                 flask.request.remote_addr,
                 bucket,
@@ -51,8 +52,8 @@ def upload_file(bucket: str):
         else:
             raise
 
-    config.s3_client.upload_fileobj(Fileobj=file, Bucket=bucket, Key=file.filename)
-    config.logs_logger.info(
+    service.s3_client.upload_fileobj(Fileobj=file, Bucket=bucket, Key=file.filename)
+    service.logs_logger.info(
         "%s uploaded file %s to bucket %s.",
         flask.request.remote_addr,
         file.filename,
@@ -73,13 +74,13 @@ def generate_url(bucket, filename):
     Fetches a file from the specified bucket.
     """
 
-    metadata = config.s3_client.head_object(Bucket=bucket, Key=filename)
+    metadata = service.s3_client.head_object(Bucket=bucket, Key=filename)
 
     url = controller.file.generate_presigned_url(
         bucket=bucket, filename=filename, content_type=metadata["ContentType"]
     )
 
-    if config.ENVIRONMENT == "development":
+    if config.Environment.ENVIRONMENT == "development":
         url = url.replace("http://localstack", "http://127.0.0.1")
 
     return "Generated file URL successfully.", 200, {"location": url}
@@ -92,8 +93,8 @@ def delete(bucket, filename):
     Deletes a file from the specified bucket.
     """
 
-    config.s3_client.delete_object(Bucket=bucket, Key=filename)
-    config.logs_logger.info(
+    service.s3_client.delete_object(Bucket=bucket, Key=filename)
+    service.logs_logger.info(
         "%s deleted file %s from bucket %s.",
         flask.request.remote_addr,
         filename,
