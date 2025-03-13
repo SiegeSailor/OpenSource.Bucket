@@ -6,7 +6,8 @@ import functools
 
 import botocore
 import flask
-import service
+
+import source.service
 
 
 def format_response(callback):
@@ -27,7 +28,7 @@ def format_response(callback):
             )
         # pylint: disable=broad-exception-caught
         except botocore.exceptions.ClientError:
-            service.logs_logger.error(
+            source.service.logs_logger.error(
                 "%s encountered an error.",
                 flask.request.remote_addr,
                 exc_info=True,

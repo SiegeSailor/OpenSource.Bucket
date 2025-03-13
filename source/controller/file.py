@@ -2,9 +2,10 @@
 This module contains the controllers for file operations.
 """
 
-import config
 import flask
-import service
+
+import source.config
+import source.service
 
 
 def generate_presigned_url(bucket: str, filename: str, content_type: str):
@@ -21,7 +22,7 @@ def generate_presigned_url(bucket: str, filename: str, content_type: str):
     :rtype: str
     """
 
-    url: str = service.s3_client.generate_presigned_url(
+    url: str = source.service.s3_client.generate_presigned_url(
         ClientMethod="put_object",
         HttpMethod="GET",
         Params={
@@ -31,7 +32,7 @@ def generate_presigned_url(bucket: str, filename: str, content_type: str):
         },
         ExpiresIn=3600 * 24,
     )
-    service.logs_logger.info(
+    source.service.logs_logger.info(
         "%s generated presigned URL %s for file %s in bucket %s.",
         flask.request.remote_addr,
         url,
@@ -39,7 +40,7 @@ def generate_presigned_url(bucket: str, filename: str, content_type: str):
         bucket,
     )
 
-    if config.Environment.ENVIRONMENT == "development":
+    if source.config.Environment.ENVIRONMENT == "development":
         url = url.replace("http://localstack", "http://127.0.0.1", 1)
 
     return url

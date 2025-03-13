@@ -34,7 +34,7 @@ services:
       test: ["CMD", "curl", "http://127.0.0.1:5000"]
 
   localstack:
-    image: localstack/localstack
+    image: localstack/localstack:4.2.0
     networks:
       - bridge
     volumes:
@@ -48,15 +48,17 @@ services:
       DOCKER_HOST: unix:///var/run/docker.sock
       DOCKER_SOCK: /var/run/docker.sock
       EDGE_PORT: 4566
+      EXTERNAL_SERVICE_PORTS_END: 4559
+      EXTERNAL_SERVICE_PORTS_START: 4510
+      GATEWAY_LISTEN: 0.0.0.0:4566
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      LOG_LICENSE_ISSUES: 0
+      LS_LOG: info
       PERSISTENCE: 1
       SERVICES: s3,logs
       SNAPSHOT_FLUSH_INTERVAL: 15
       SNAPSHOT_LOAD_STRATEGY: ON_REQUESTED
       SNAPSHOT_SAVE_STRATEGY: SCHEDULED
-      GATEWAY_LISTEN: 0.0.0.0:4566
-      EXTERNAL_SERVICE_PORTS_START: 4510
-      EXTERNAL_SERVICE_PORTS_END: 4559
     ports:
       - 4566:4566
       - 4510-4559:4510-4559
