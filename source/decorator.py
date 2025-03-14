@@ -3,14 +3,15 @@ Decorators for the API.
 """
 
 import functools
+import typing
 
 import botocore
 import flask
 
-import source.service
+import source.client
 
 
-def format_response(callback):
+def format_response(callback: typing.Callable):
     """
     Formats the response of the API.
     """
@@ -28,7 +29,7 @@ def format_response(callback):
             )
         # pylint: disable=broad-exception-caught
         except botocore.exceptions.ClientError:
-            source.service.logs_logger.error(
+            source.client.logs_logger.error(
                 "%s encountered an error.",
                 flask.request.remote_addr,
                 exc_info=True,

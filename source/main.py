@@ -6,7 +6,7 @@ import flask
 import flask_cors
 
 import source.config
-import source.decorators
+import source.decorator
 import source.route
 
 
@@ -29,7 +29,7 @@ def create_main():
     main.register_blueprint(blueprint=source.route.file.blueprint)
 
     @main.route("/", methods=["GET"])
-    @source.decorators.format_response
+    @source.decorator.format_response
     def check():
         """
         Check if the application is running.
@@ -38,7 +38,7 @@ def create_main():
         return "The service is running.", 200
 
     @main.errorhandler(404)
-    @source.decorators.format_response
+    @source.decorator.format_response
     def fallback(_):
         """
         Fallback route for handling 404 errors.

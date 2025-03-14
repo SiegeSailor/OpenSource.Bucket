@@ -4,8 +4,8 @@ This module contains the controllers for file operations.
 
 import flask
 
+import source.client
 import source.config
-import source.service
 
 
 def generate_presigned_url(bucket: str, filename: str, content_type: str):
@@ -22,7 +22,7 @@ def generate_presigned_url(bucket: str, filename: str, content_type: str):
     :rtype: str
     """
 
-    url: str = source.service.s3_client.generate_presigned_url(
+    url: str = source.client.s3_client.generate_presigned_url(
         ClientMethod="put_object",
         HttpMethod="GET",
         Params={
@@ -32,7 +32,7 @@ def generate_presigned_url(bucket: str, filename: str, content_type: str):
         },
         ExpiresIn=3600 * 24,
     )
-    source.service.logs_logger.info(
+    source.client.logs_logger.info(
         "%s generated presigned URL %s for file %s in bucket %s.",
         flask.request.remote_addr,
         url,
