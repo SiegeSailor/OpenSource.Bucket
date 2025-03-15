@@ -3,7 +3,6 @@ This module contains the service configuration and initialization logic.
 """
 
 import logging
-import typing
 
 import boto3
 import watchtower
@@ -47,32 +46,35 @@ class AWS:
 
     def create_logger(
         self,
+        client: boto3.client,
         group: str,
         stream: str,
-        client: boto3.client,
-        name: typing.Optional[str],
+        **kwargs,
     ):
         """
         Create a logger for CloudWatch Logs.
 
-        :param str name: The name of the logger.
-        :param str group: The name of the log group.
         :param boto3.client client: The CloudWatch Logs client.
+        :param str group: The name of the log group.
+        :param str stream: The name of the log stream.
+        :keyword str name: The name of the logger. Use the default logger if `None`.
+        :keyword bool is_connecting_cloud: Whether the logger is connecting to CloudWatch Logs.
         :return: The logger.
         :rtype: logging.Logger
         """
 
-        logs_logger = logging.getLogger(name)
+        logs_logger = logging.getLogger(kwargs.get("name"))
         logs_logger.setLevel(logging.INFO)
         logs_logger.addHandler(logging.StreamHandler())
-        logs_logger.addHandler(
-            watchtower.CloudWatchLogHandler(
-                log_group_name=group,
-                log_stream_name=stream,
-                create_log_group=True,
-                create_log_stream=True,
-                boto3_client=client,
+        if kwargs.get("is_connecting_cloud"):
+            logs_logger.addHandler(
+                watchtower.CloudWatchLogHandler(
+                    log_group_name=group,
+                    log_stream_name=stream,
+                    create_log_group=True,
+                    create_log_stream=True,
+                    boto3_client=client,
+                )
             )
-        )
 
         return logs_logger

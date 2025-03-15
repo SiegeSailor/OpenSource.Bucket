@@ -29,7 +29,7 @@ def format_response(callback: typing.Callable):
                 payload["data"] = data[0]
             return (flask.jsonify(payload), status)
         except botocore.exceptions.ClientError as error:
-            flask.current_app.config["service_logger"].error(
+            flask.current_app.config["logger_service"].error(
                 "%s triggered an client error.",
                 flask.request.remote_addr,
                 exc_info=True,
@@ -42,7 +42,7 @@ def format_response(callback: typing.Callable):
             )
         # pylint: disable=broad-exception-caught
         except Exception as error:
-            flask.current_app.config["default_logger"].error(
+            flask.current_app.config["logger_default"].error(
                 "%s triggered an server error.",
                 flask.request.remote_addr,
                 exc_info=True,

@@ -20,33 +20,35 @@ def register_client(main: flask.Flask):
     """
 
     aws = source.client.AWS(
-        region=main.config["AWS_DEFAULT_REGION"],
-        secret_access_key=main.config["AWS_SECRET_ACCESS_KEY"],
-        access_key_id=main.config["AWS_ACCESS_KEY_ID"],
-        session_token=main.config["AWS_SESSION_TOKEN"],
-        account_id=main.config["AWS_ACCOUNT_ID"],
+        region=main.config.get("AWS_DEFAULT_REGION"),
+        secret_access_key=main.config.get("AWS_SECRET_ACCESS_KEY"),
+        access_key_id=main.config.get("AWS_ACCESS_KEY_ID"),
+        session_token=main.config.get("AWS_SESSION_TOKEN"),
+        account_id=main.config.get("AWS_ACCOUNT_ID"),
     )
 
-    main.config["s3"] = aws.create_client(
+    main.config["client_s3"] = aws.create_client(
         service="s3",
-        endpoint_url=main.config["AWS_S3_ENDPOINT"],
+        endpoint_url=main.config.get("AWS_S3_ENDPOINT"),
     )
 
-    main.config["logs"] = aws.create_client(
+    main.config["client_logs"] = aws.create_client(
         service="logs",
-        endpoint_url=main.config["AWS_CLOUDWATCH_LOGS_ENDPOINT"],
+        endpoint_url=main.config.get("AWS_CLOUDWATCH_LOGS_ENDPOINT"),
     )
-    main.config["service_logger"] = aws.create_logger(
-        group=main.config["AWS_CLOUDWATCH_LOGS_LOG_GROUP"],
+    main.config["logger_service"] = aws.create_logger(
+        group=main.config.get("AWS_CLOUDWATCH_LOGS_LOG_GROUP"),
         stream="service",
-        client=main.config["logs"],
+        client=main.config.get("client_logs"),
         name="service",
+        is_connecting_cloud=not main.config.get("TESTING"),
     )
-    main.config["default_logger"] = aws.create_logger(
-        group=main.config["AWS_CLOUDWATCH_LOGS_LOG_GROUP"],
+    main.config["logger_default"] = aws.create_logger(
+        group=main.config.get("AWS_CLOUDWATCH_LOGS_LOG_GROUP"),
         stream="default",
-        client=main.config["logs"],
+        client=main.config.get("client_logs"),
         name=None,
+        is_connecting_cloud=not main.config.get("TESTING"),
     )
 
 
