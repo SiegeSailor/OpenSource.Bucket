@@ -19,6 +19,7 @@ class BaseConfig:
     AWS_S3_ENDPOINT = os.getenv("AWS_S3_ENDPOINT")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
     AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
+    CORS_ORIGINS = os.getenv("CORS_ORIGINS").split(",")
     ENVIRONMENT = os.getenv("ENVIRONMENT")
 
     DEBUG = False

@@ -85,7 +85,7 @@ def upload_file(
                     "CORSRules": [
                         {
                             "AllowedHeaders": ["*"],
-                            "AllowedMethods": ["GET", "POST", "HEAD", "PUT"],
+                            "AllowedMethods": ["GET", "HEAD"],
                             "AllowedOrigins": ["*"],
                             "ExposeHeaders": ["ETag"],
                             "MaxAgeSeconds": kwargs.get("max_age", 3600),

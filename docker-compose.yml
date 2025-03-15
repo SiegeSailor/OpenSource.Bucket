@@ -23,6 +23,7 @@ services:
       AWS_S3_ENDPOINT: ${AWS_S3_ENDPOINT}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_SESSION_TOKEN: ${AWS_SESSION_TOKEN}
+      CORS_ORIGINS: ${CORS_ORIGINS}
       FLASK_APP: main:create_main
       FLASK_DEBUG: 1
     ports:
