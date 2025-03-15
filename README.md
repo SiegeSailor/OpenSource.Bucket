@@ -98,4 +98,8 @@ flask-1       | INFO:werkzeug:Press CTRL+C to quit
 python -m unittest discover --start-directory ./test
 ```
 
+- Logs not working
+- localhost:4566 is not connected error when running tests
+- CORS origins from .env
+
 ## Production

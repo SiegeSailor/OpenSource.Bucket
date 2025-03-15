@@ -38,7 +38,7 @@ def format_response(callback: typing.Callable):
                 flask.jsonify(
                     {"message": f"{error.__class__.__name__}: {error.args[0]}"}
                 ),
-                500,
+                error.response["Error"]["Code"],
             )
         # pylint: disable=broad-exception-caught
         except Exception as error:

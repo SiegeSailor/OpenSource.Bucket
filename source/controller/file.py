@@ -59,7 +59,7 @@ def upload_file(
     **kwargs,
 ):
     """
-    Uploads a file to the specified S3 bucket.
+    Uploads a file to the specified S3 bucket. The bucket is created if it does not exist.
 
     :param boto3.client client: The S3 client.
     :param typing.BinaryIO file: The file to upload.
@@ -128,7 +128,7 @@ def delete_file(
     **kwargs,
 ):
     """
-    Deletes a file from the specified S3 bucket.
+    Deletes a file from the specified S3 bucket. Fails if the file does not exist.
 
     :param boto3.client client: The S3 client.
     :param str bucket: The bucket containing the file.
@@ -136,6 +136,7 @@ def delete_file(
     :keyword typing.Optional[logging.Logger] logger: The logger.
     """
 
+    client.head_object(Bucket=bucket, Key=filename)
     client.delete_object(Bucket=bucket, Key=filename)
     if "logger" in kwargs:
         kwargs.get("logger").info(
