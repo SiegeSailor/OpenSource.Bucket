@@ -23,11 +23,10 @@ def upload_file(bucket: str):
         return "File is not provided.", 400
 
     url = source.controller.file.upload_file(
-        s3_client=flask.current_app.config["s3"],
-        logger=flask.current_app.config["service_logger"],
+        client=flask.current_app.config["s3"],
         file=file,
         bucket=bucket,
-        is_replacing=flask.current_app.config["ENVIRONMENT"] == "development",
+        logger=flask.current_app.config["service_logger"],
     )
 
     return "Uploaded file successfully.", 201, {"location": url}
@@ -43,12 +42,11 @@ def generate_url(bucket, filename):
     metadata = flask.current_app.config["s3"].head_object(Bucket=bucket, Key=filename)
 
     url = source.controller.file.generate_presigned_url(
-        s3_client=flask.current_app.config["s3"],
-        logger=flask.current_app.config["service_logger"],
+        client=flask.current_app.config["s3"],
         bucket=bucket,
         filename=filename,
         content_type=metadata["ContentType"],
-        is_replacing=flask.current_app.config["ENVIRONMENT"] == "development",
+        logger=flask.current_app.config["service_logger"],
     )
 
     return "Generated file URL successfully.", 200, {"location": url}
@@ -62,10 +60,10 @@ def delete(bucket, filename):
     """
 
     source.controller.file.delete_file(
-        s3_client=flask.current_app.config["s3"],
-        logger=flask.current_app.config["service_logger"],
+        client=flask.current_app.config["s3"],
         bucket=bucket,
         filename=filename,
+        logger=flask.current_app.config["service_logger"],
     )
 
     return "Deleted file successfully.", 200

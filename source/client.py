@@ -13,14 +13,14 @@ class AWS:
     """
     This class is an AWS client factory.
 
-    :keyword str region: The region of the AWS client.
-    :keyword str secret_access_key: The secret access key of the AWS client. It is
+    :keyword typing.Optional[str] region: The region of AWS.
+    :keyword typing.Optional[str] secret_access_key: The secret access key of AWS. It is
         available on [AWS Account Overview](https://console.aws.amazon.com/).
-    :keyword str access_key_id: The access key id of the AWS client. It is available
+    :keyword typing.Optional[str] access_key_id: The access key id of AWS. It is available
         on [AWS Account Overview](https://console.aws.amazon.com/).
-    :keyword str session_token: The session token of the AWS client. It is available with
-        [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).
-    :keyword str account_id: A 12-digit number. It is available on
+    :keyword typing.Optional[str] session_token: The session token of AWS. It is available
+        with [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).
+    :keyword typing.Optional[str] account_id: A 12-digit number. It is available on
         [AWS Account Overview](https://console.aws.amazon.com/).
     """
 
@@ -38,7 +38,7 @@ class AWS:
         Create a service client.
 
         :param str service: The service name.
-        :keyword str endpoint_url: The endpoint URL of the S3 client.
+        :keyword typing.Optional[str] endpoint_url: The endpoint URL of the S3 client.
         :return: The service client.
         :rtype: boto3.client
         """
@@ -67,8 +67,8 @@ class AWS:
         logs_logger.addHandler(logging.StreamHandler())
         logs_logger.addHandler(
             watchtower.CloudWatchLogHandler(
-                log_group=group,
-                stream_name=stream,
+                log_group_name=group,
+                log_stream_name=stream,
                 create_log_group=True,
                 create_log_stream=True,
                 boto3_client=client,

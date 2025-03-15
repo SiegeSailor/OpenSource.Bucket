@@ -12,6 +12,12 @@ import flask
 def format_response(callback: typing.Callable):
     """
     Formats the response of the API.
+
+    :param typing.Callable callback: The wrapped function. The first returned element is
+        the message, the second is the status code, and the third is a keyword dictionary,
+        which contains an optional element `data`.
+    :return: The formatted JSON response.
+    :rtype: flask.Response
     """
 
     @functools.wraps(callback)
@@ -21,24 +27,29 @@ def format_response(callback: typing.Callable):
             payload = {"message": message}
             if data:
                 payload["data"] = data[0]
-            return (
-                flask.jsonify(payload),
-                status,
-            )
-        # pylint: disable=broad-exception-caught
-        except botocore.exceptions.ClientError:
+            return (flask.jsonify(payload), status)
+        except botocore.exceptions.ClientError as error:
             flask.current_app.config["service_logger"].error(
-                "%s encountered an error.",
+                "%s triggered an client error.",
                 flask.request.remote_addr,
                 exc_info=True,
             )
-            raise
-        except Exception as error:
             return (
                 flask.jsonify(
-                    {
-                        "message": str(error),
-                    }
+                    {"message": f"{error.__class__.__name__}: {error.args[0]}"}
+                ),
+                500,
+            )
+        # pylint: disable=broad-exception-caught
+        except Exception as error:
+            flask.current_app.config["default_logger"].error(
+                "%s triggered an server error.",
+                flask.request.remote_addr,
+                exc_info=True,
+            )
+            return (
+                flask.jsonify(
+                    {"message": f"{error.__class__.__name__}: {error.args[0]}"}
                 ),
                 500,
             )

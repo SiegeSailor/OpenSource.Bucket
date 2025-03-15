@@ -2,7 +2,6 @@
 This module contains the controllers for file operations.
 """
 
-import logging
 import typing
 
 import boto3
@@ -11,27 +10,27 @@ import flask
 
 
 def generate_presigned_url(
-    s3_client: boto3.client,
-    logger: logging.Logger,
+    client: boto3.client,
     bucket: str,
     filename: str,
     content_type: str,
-    is_replacing: bool = False,
+    **kwargs,
 ):
     """
     Generates a presigned URL for the specified file in the specified S3 bucket.
 
+    :param boto3.client client: The S3 client.
     :param str bucket: The bucket containing the file.
     :param str filename: The name of the file.
     :param str content_type: The content type of the file.
-    :param bool is_replacing: Whether the `localstack` string is replaced with `127.0.0.1`.
+    :keyword typing.Optional[logging.Logger] logger: The logger.
+    :keyword typing.Optional[int] expires_in: The number of seconds the URL is valid for.
+        Default to `86400` (24 hours).
     :return: The presigned URL.
     :rtype: str
     """
 
-    print("=========")
-
-    url: str = s3_client.generate_presigned_url(
+    url = client.generate_presigned_url(
         ClientMethod="put_object",
         HttpMethod="GET",
         Params={
@@ -39,46 +38,47 @@ def generate_presigned_url(
             "Key": filename,
             "ContentType": content_type,
         },
-        ExpiresIn=3600 * 24,
+        ExpiresIn=kwargs.get("expires_in", 3600 * 24),
     )
-    logger.info(
-        "%s generated presigned URL %s for file %s in bucket %s.",
-        flask.request.remote_addr,
-        url,
-        filename,
-        bucket,
-    )
-    print(url)
-    if is_replacing:
-        url = url.replace("localstack", "127.0.0.1", 1)
+    if "logger" in kwargs:
+        kwargs.get("logger").info(
+            "%s generated presigned URL %s for file %s in bucket %s.",
+            flask.request.remote_addr,
+            url,
+            filename,
+            bucket,
+        )
 
-    return url
+    return url.replace("localstack", "127.0.0.1", 1)
 
 
 def upload_file(
-    s3_client: boto3.client,
-    logger: logging.Logger,
+    client: boto3.client,
     file: typing.BinaryIO,
     bucket: str,
-    is_replacing: bool = False,
+    **kwargs,
 ):
     """
     Uploads a file to the specified S3 bucket.
 
-    :param boto3.client s3_client: The S3 client.
-    :param logging.Logger logger: The logger.
+    :param boto3.client client: The S3 client.
     :param typing.BinaryIO file: The file to upload.
     :param str bucket: The bucket to upload the file to.
+    :keyword typing.Optional[logging.Logger] logger: The logger.
+    :keyword typing.Optional[int] max_age: The number of seconds the URL is valid for.
+        Default to `3600` (1 hour).
+    :keyword typing.Optional[int] expires_in: The number of seconds the URL is valid for.
+        Default to `86400` (24 hours).
     :return: The URL of the uploaded file.
     :rtype: str
     """
 
     try:
-        s3_client.head_bucket(Bucket=bucket)
+        client.head_bucket(Bucket=bucket)
     except botocore.exceptions.ClientError as error:
         if error.response["Error"]["Code"] == "404":
-            s3_client.create_bucket(Bucket=bucket)
-            s3_client.put_bucket_cors(
+            client.create_bucket(Bucket=bucket)
+            client.put_bucket_cors(
                 Bucket=bucket,
                 ExpectedBucketOwner=flask.current_app.config["AWS_ACCOUNT_ID"],
                 CORSConfiguration={
@@ -88,59 +88,59 @@ def upload_file(
                             "AllowedMethods": ["GET", "POST", "HEAD", "PUT"],
                             "AllowedOrigins": ["*"],
                             "ExposeHeaders": ["ETag"],
-                            "MaxAgeSeconds": 3600,
+                            "MaxAgeSeconds": kwargs.get("max_age", 3600),
                         }
                     ]
                 },
             )
-            logger.info(
-                "%s created bucket %s.",
-                flask.request.remote_addr,
-                bucket,
-            )
+            if "logger" in kwargs:
+                kwargs.get("logger").info(
+                    "%s created bucket %s.",
+                    flask.request.remote_addr,
+                    bucket,
+                )
         else:
             raise
 
-    s3_client.upload_fileobj(Fileobj=file, Bucket=bucket, Key=file.filename)
-    logger.info(
-        "%s uploaded file %s to bucket %s.",
-        flask.request.remote_addr,
-        file.filename,
-        bucket,
-    )
+    client.upload_fileobj(Fileobj=file, Bucket=bucket, Key=file.filename)
+    if "logger" in kwargs:
+        kwargs.get("logger").info(
+            "%s uploaded file %s to bucket %s.",
+            flask.request.remote_addr,
+            file.filename,
+            bucket,
+        )
 
-    url = generate_presigned_url(
-        s3_client=s3_client,
-        logger=logger,
+    return generate_presigned_url(
+        client=client,
         bucket=bucket,
         filename=file.filename,
         content_type=file.content_type,
-        is_replacing=is_replacing,
+        logger=kwargs.get("logger"),
+        expires_in=kwargs.get("expires_in"),
     )
-
-    return url
 
 
 def delete_file(
-    s3_client: boto3.client,
-    logger: logging.Logger,
+    client: boto3.client,
     bucket: str,
     filename: str,
+    **kwargs,
 ):
     """
     Deletes a file from the specified S3 bucket.
 
-    :param boto3.client s3_client: The S3 client.
-    :param logging.Logger logger: The logger.
+    :param boto3.client client: The S3 client.
     :param str bucket: The bucket containing the file.
-    :param filename: The name of the file.
-    :type filename: str
+    :param str filename: The name of the file.
+    :keyword typing.Optional[logging.Logger] logger: The logger.
     """
 
-    s3_client.delete_object(Bucket=bucket, Key=filename)
-    logger.info(
-        "%s deleted file %s from bucket %s.",
-        flask.request.remote_addr,
-        filename,
-        bucket,
-    )
+    client.delete_object(Bucket=bucket, Key=filename)
+    if "logger" in kwargs:
+        kwargs.get("logger").info(
+            "%s deleted file %s from bucket %s.",
+            flask.request.remote_addr,
+            filename,
+            bucket,
+        )
