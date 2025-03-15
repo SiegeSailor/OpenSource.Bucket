@@ -28,16 +28,16 @@ The varaibles below have been wrapped in development and automation tools, such 
 | `AWS_S3_ENDPOINT`               | AWS S3 service endpoint.                                                                             |
 | `AWS_SECRET_ACCESS_KEY`         | Available on [AWS Account Overview](https://console.aws.amazon.com/).                                |
 | `AWS_SESSION_TOKEN`             | Available with [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html). |
-| `ENVIRONMENT`                   | Accept `development`, `testing`, and `production`.                                                   |
+| `ENVIRONMENT`                   | Accept [`development`](#development), [`testing`](#testing), and [`production`](#production).        |
 | `LOCALSTACK_AUTH_TOKEN`         | Available on [LocalStack Auth Tokens](https://app.localstack.cloud/workspace/auth-tokens).           |
 
 ## Prerequesites
 
 - Docker: `Docker version 28.0.1, build 068a01e`
 
-## Local Development
+## Development
 
-Create a `.env` in the root directory:
+Configure a local development environment. Create a `.env` in the root directory:
 
 ```conf
 AWS_ACCESS_KEY_ID=dummy
@@ -91,3 +91,11 @@ flask-1       |  * Running on http://127.0.0.1:5000
 flask-1       |  * Running on http://172.18.0.3:5000
 flask-1       | INFO:werkzeug:Press CTRL+C to quit
 ```
+
+## Testing
+
+```bash
+python -m unittest discover --start-directory ./test
+```
+
+## Production

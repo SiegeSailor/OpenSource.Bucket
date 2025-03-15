@@ -5,9 +5,9 @@ This file contains the configuration for the application.
 import os
 
 
-class Environment:
+class BaseConfig:
     """
-    This class contains the environment variables for the application.
+    This class contains the configuration for the application.
     """
 
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -21,14 +21,8 @@ class Environment:
     AWS_SESSION_TOKEN = os.getenv("AWS_SESSION_TOKEN")
     ENVIRONMENT = os.getenv("ENVIRONMENT")
 
-
-class BaseConfig:
-    """
-    This class contains the configuration for the application.
-    """
-
     DEBUG = False
-    SECRET_KEY = Environment.AWS_SECRET_ACCESS_KEY
+    SECRET_KEY = AWS_SECRET_ACCESS_KEY
     TESTING = False
 
 

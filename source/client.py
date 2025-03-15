@@ -3,46 +3,76 @@ This module contains the service configuration and initialization logic.
 """
 
 import logging
+import typing
 
 import boto3
 import watchtower
 
-import source.config
 
-_session = boto3.Session(
-    region_name=source.config.Environment.AWS_DEFAULT_REGION,
-    aws_secret_access_key=source.config.Environment.AWS_SECRET_ACCESS_KEY,
-    aws_access_key_id=source.config.Environment.AWS_ACCESS_KEY_ID,
-    aws_session_token=source.config.Environment.AWS_SESSION_TOKEN,
-    aws_account_id=source.config.Environment.AWS_SESSION_TOKEN,
-)
+class AWS:
+    """
+    This class is an AWS client factory.
 
+    :keyword str region: The region of the AWS client.
+    :keyword str secret_access_key: The secret access key of the AWS client. It is
+        available on [AWS Account Overview](https://console.aws.amazon.com/).
+    :keyword str access_key_id: The access key id of the AWS client. It is available
+        on [AWS Account Overview](https://console.aws.amazon.com/).
+    :keyword str session_token: The session token of the AWS client. It is available with
+        [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).
+    :keyword str account_id: A 12-digit number. It is available on
+        [AWS Account Overview](https://console.aws.amazon.com/).
+    """
 
-s3 = _session.client("s3", endpoint_url=source.config.Environment.AWS_S3_ENDPOINT)
-logs = _session.client(
-    "logs", endpoint_url=source.config.Environment.AWS_CLOUDWATCH_LOGS_ENDPOINT
-)
+    def __init__(self, **kwargs):
+        self._session = boto3.Session(
+            region_name=kwargs.get("region"),
+            aws_secret_access_key=kwargs.get("secret_access_key"),
+            aws_access_key_id=kwargs.get("access_key_id"),
+            aws_session_token=kwargs.get("session_token"),
+            aws_account_id=kwargs.get("account_id"),
+        )
 
-logging.basicConfig(level=logging.INFO, handlers=[logging.StreamHandler()])
+    def create_client(self, service: str, **kwargs):
+        """
+        Create a service client.
 
-logging.getLogger().addHandler(
-    watchtower.CloudWatchLogHandler(
-        log_group=source.config.Environment.AWS_CLOUDWATCH_LOGS_LOG_GROUP,
-        stream_name="default",
-        create_log_group=True,
-        create_log_stream=True,
-        boto3_client=logs,
-    )
-)
-logs_logger = logging.getLogger(__name__)
-logs_logger.setLevel(logging.INFO)
-logs_logger.addHandler(logging.StreamHandler())
-logs_logger.addHandler(
-    watchtower.CloudWatchLogHandler(
-        log_group=source.config.Environment.AWS_CLOUDWATCH_LOGS_LOG_GROUP,
-        stream_name="service",
-        create_log_group=True,
-        create_log_stream=True,
-        boto3_client=logs,
-    )
-)
+        :param str service: The service name.
+        :keyword str endpoint_url: The endpoint URL of the S3 client.
+        :return: The service client.
+        :rtype: boto3.client
+        """
+
+        return self._session.client(service, endpoint_url=kwargs.get("endpoint_url"))
+
+    def create_logger(
+        self,
+        group: str,
+        stream: str,
+        client: boto3.client,
+        name: typing.Optional[str],
+    ):
+        """
+        Create a logger for CloudWatch Logs.
+
+        :param str name: The name of the logger.
+        :param str group: The name of the log group.
+        :param boto3.client client: The CloudWatch Logs client.
+        :return: The logger.
+        :rtype: logging.Logger
+        """
+
+        logs_logger = logging.getLogger(name)
+        logs_logger.setLevel(logging.INFO)
+        logs_logger.addHandler(logging.StreamHandler())
+        logs_logger.addHandler(
+            watchtower.CloudWatchLogHandler(
+                log_group=group,
+                stream_name=stream,
+                create_log_group=True,
+                create_log_stream=True,
+                boto3_client=client,
+            )
+        )
+
+        return logs_logger

@@ -8,8 +8,6 @@ import typing
 import botocore
 import flask
 
-import source.client
-
 
 def format_response(callback: typing.Callable):
     """
@@ -29,7 +27,7 @@ def format_response(callback: typing.Callable):
             )
         # pylint: disable=broad-exception-caught
         except botocore.exceptions.ClientError:
-            source.client.logs_logger.error(
+            flask.current_app.config["service_logger"].error(
                 "%s encountered an error.",
                 flask.request.remote_addr,
                 exc_info=True,

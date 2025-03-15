@@ -2,9 +2,6 @@
 
 import unittest
 
-# This line also runs `source.service`
-# which runs `watchtower.CloudWatchLogHandler`
-# that connects to `localstack` and therefore raise connection errors
 import source.main
 
 
