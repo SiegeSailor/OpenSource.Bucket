@@ -47,7 +47,6 @@ services:
       DEBUG: 1
       DOCKER_HOST: unix:///var/run/docker.sock
       DOCKER_SOCK: /var/run/docker.sock
-      EDGE_PORT: 4566
       EXTERNAL_SERVICE_PORTS_END: 4559
       EXTERNAL_SERVICE_PORTS_START: 4510
       GATEWAY_LISTEN: 0.0.0.0:4566
