@@ -23,6 +23,10 @@ class TestFile(test.BaseTestCase):
     def tearDown(self):
         buckets = self.s3.list_buckets()["Buckets"]
         for bucket in buckets:
+            items = self.s3.list_objects_v2(Bucket=bucket["Name"])
+            if "Contents" in items:
+                for item in items["Contents"]:
+                    self.s3.delete_object(Bucket=bucket["Name"], Key=item["Key"])
             self.s3.delete_bucket(Bucket=bucket["Name"])
 
     def test_upload_file(self):
@@ -33,7 +37,7 @@ class TestFile(test.BaseTestCase):
         )
 
         self.assertEqual(response.status_code, 201)
-        self.assertIn("location", response.data)
+        self.assertIn("location", response.data.decode())
 
     def test_generate_url(self):
         self.client.post(
@@ -44,7 +48,7 @@ class TestFile(test.BaseTestCase):
         response = self.client.get(f"/file/dummy-bucket/filename.txt")
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn("location", response.data)
+        self.assertIn("location", response.data.decode())
 
     def test_delete_file(self):
         self.client.post(
