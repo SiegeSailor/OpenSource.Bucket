@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE_FLASK_TESTING: flask
+  DOCKER_IMAGE_FLASK: flask
 
 jobs:
   build:
@@ -90,5 +90,5 @@ jobs:
             --publish "5001:5000" \
             --volume "./test/:/test/" \
             --network host \
-            $DOCKER_IMAGE_FLASK_TESTING \
+            $DOCKER_IMAGE_FLASK \
             "python" "-m" "unittest" "discover" "--start-directory" "/test/"

@@ -39,6 +39,7 @@ Configure a local development environment using Docker Compose.
 
 - Docker: `Docker version 28.0.1, build 068a01e`
 - Terraform: `Terraform v1.11.2`
+- AWS: `aws-cli/2.24.24`
 
 Create a `.env` in the root directory:
 
@@ -92,6 +93,11 @@ flask-1       |  * Running on all addresses (0.0.0.0)
 flask-1       |  * Running on http://127.0.0.1:5000
 flask-1       |  * Running on http://172.18.0.3:5000
 flask-1       | INFO:werkzeug:Press CTRL+C to quit
+```
+
+```bash
+export AWS_ACCESS_KEY_ID=AKIAYFU5B6WU4FY5PHNF
+export AWS_SECRET_ACCESS_KEY=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
 ```
 
 ## Testing
