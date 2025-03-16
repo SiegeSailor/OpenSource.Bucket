@@ -14,9 +14,6 @@ jobs:
     services:
       localstack:
         image: localstack/localstack:4.2.0
-        ports:
-          - 4566:4566
-          - 4510-4559:4510-4559
         env:
           ACTIVATE_PRO: 0
           DEBUG: 1
@@ -46,11 +43,11 @@ jobs:
           docker run --rm \
             --env AWS_ACCESS_KEY_ID="dummy" \
             --env AWS_ACCOUNT_ID="000000000000" \
-            --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://127.0.0.1:4566" \
+            --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
             --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
             --env AWS_DEFAULT_REGION="us-east-1" \
             --env AWS_S3_BUCKET="file-service" \
-            --env AWS_S3_ENDPOINT="http://127.0.0.1:4566" \
+            --env AWS_S3_ENDPOINT="http://localstack:4566" \
             --env AWS_SECRET_ACCESS_KEY="test" \
             --env AWS_SESSION_TOKEN="test" \
             --env CORS_ORIGINS="*" \
