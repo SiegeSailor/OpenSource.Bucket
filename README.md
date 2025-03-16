@@ -24,7 +24,6 @@ The varaibles below have been wrapped in development and automation tools, such 
 | `AWS_CLOUDWATCH_LOGS_ENDPOINT`  | AWS CloudWatch Logs service endpoint.                                                                                                                                                           |
 | `AWS_CLOUDWATCH_LOGS_LOG_GROUP` | The log group name for logs generated in this project.                                                                                                                                          |
 | `AWS_DEFAULT_REGION`            | Default AWS region.                                                                                                                                                                             |
-| `AWS_S3_BUCKET`                 | The top-level bucket name for the buckets and files that are created or uploaded through this project.                                                                                          |
 | `AWS_S3_ENDPOINT`               | AWS S3 service endpoint.                                                                                                                                                                        |
 | `AWS_SECRET_ACCESS_KEY`         | The secret access key of AWS. It is available on [AWS Account Overview](https://console.aws.amazon.com/).                                                                                       |
 | `AWS_SESSION_TOKEN`             | The session token of AWS. It is available with [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).                                                            |
@@ -46,7 +45,6 @@ AWS_ACCOUNT_ID=000000000000
 AWS_CLOUDWATCH_LOGS_ENDPOINT=http://localstack:4566
 AWS_CLOUDWATCH_LOGS_LOG_GROUP=file-service
 AWS_DEFAULT_REGION=us-east-1
-AWS_S3_BUCKET=file-service
 AWS_S3_ENDPOINT=http://localstack:4566
 AWS_SECRET_ACCESS_KEY=test
 AWS_SESSION_TOKEN=test
@@ -116,7 +114,6 @@ docker run --interactive --tty --rm \
     --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
     --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
     --env AWS_DEFAULT_REGION="us-east-1" \
-    --env AWS_S3_BUCKET="file-service" \
     --env AWS_S3_ENDPOINT="http://localstack:4566" \
     --env AWS_SECRET_ACCESS_KEY="test" \
     --env AWS_SESSION_TOKEN="test" \
@@ -133,10 +130,14 @@ docker run --interactive --tty --rm \
 
 ## Miscellaneous
 
-Some improvement to make to shape this project structure more meaningful:
+Some improvement to make to shape this project structure more meaningful. Yet, not required at this moment:
 
 - Logs format
 - Routes and directory naming, including Dockerfile, Docker commands, test files
 - Plain file structure
 - CloudWatch Logs logger handler creation condition
 - File uploading should be a PUT method
+- API document generation
+- Test result generation
+- Pipeline and version badges
+- Prefix for bucket names

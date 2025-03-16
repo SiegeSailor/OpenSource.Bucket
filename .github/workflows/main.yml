@@ -49,7 +49,6 @@ jobs:
             --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localhost:4566" \
             --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
             --env AWS_DEFAULT_REGION="us-east-1" \
-            --env AWS_S3_BUCKET="file-service" \
             --env AWS_S3_ENDPOINT="http://localhost:4566" \
             --env AWS_SECRET_ACCESS_KEY="test" \
             --env AWS_SESSION_TOKEN="test" \
