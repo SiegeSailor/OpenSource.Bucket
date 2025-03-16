@@ -14,6 +14,9 @@ jobs:
     services:
       localstack:
         image: localstack/localstack:4.2.0
+        ports:
+          - 4566:4566
+          - 4510-4559:4510-4559
         env:
           ACTIVATE_PRO: 0
           DEBUG: 1
@@ -29,6 +32,7 @@ jobs:
           SNAPSHOT_FLUSH_INTERVAL: 15
           SNAPSHOT_LOAD_STRATEGY: ON_REQUESTED
           SNAPSHOT_SAVE_STRATEGY: SCHEDULED
+        options: --network host
 
     steps:
       - name: Checkout code
@@ -43,11 +47,11 @@ jobs:
           docker run --rm \
             --env AWS_ACCESS_KEY_ID="dummy" \
             --env AWS_ACCOUNT_ID="000000000000" \
-            --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
+            --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localhost:4566" \
             --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
             --env AWS_DEFAULT_REGION="us-east-1" \
             --env AWS_S3_BUCKET="file-service" \
-            --env AWS_S3_ENDPOINT="http://localstack:4566" \
+            --env AWS_S3_ENDPOINT="http://localhost:4566" \
             --env AWS_SECRET_ACCESS_KEY="test" \
             --env AWS_SESSION_TOKEN="test" \
             --env CORS_ORIGINS="*" \
@@ -55,6 +59,7 @@ jobs:
             --name "file-service-testing" \
             --publish "5001:5000" \
             --volume "./test/:/test/" \
+            --network host \
             file-service:testing \
             "python" "-m" "unittest" "discover" "--start-directory" "/test/"
 
