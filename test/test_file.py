@@ -13,7 +13,7 @@ FILE = (io.BytesIO(b"content"), FILENAME)
 
 class TestFile(test.BaseTestCase):
     def setUp(self):
-        self.client = boto3.client(
+        self.s3 = boto3.client(
             "s3",
             aws_access_key_id=self.main.config.get("AWS_ACCESS_KEY_ID"),
             aws_account_id=self.main.config.get("AWS_ACCOUNT_ID"),
@@ -24,10 +24,10 @@ class TestFile(test.BaseTestCase):
         )
 
     def tearDown(self):
-        response = self.s3_client.list_objects_v2(Bucket=BUCKET)
+        response = self.s3.list_objects_v2(Bucket=BUCKET)
         if "Contents" in response:
             for content in response["Contents"]:
-                self.s3_client.delete_object(Bucket=BUCKET, Key=content["Key"])
+                self.s3.delete_object(Bucket=BUCKET, Key=content["Key"])
 
     def test_upload_file(self):
         response = self.client.post(f"/file/{bucket}", files={"file": FILE})
