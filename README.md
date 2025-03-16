@@ -93,38 +93,7 @@ flask-1       | INFO:werkzeug:Press CTRL+C to quit
 
 ## Testing
 
-Manually run testings on the local end.
-
-### Unit Testing
-
-Build the testing Docker image. The `--build-arg` values are described in [Configurable Environment Variables](#configurable-environment-variables):
-
-```bash
-docker build \
-    --tag "file-service:testing" \
-    .
-```
-
-Start the Docker container to run tests:
-
-```bash
-docker run --interactive --tty --rm \
-    --env AWS_ACCESS_KEY_ID="dummy" \
-    --env AWS_ACCOUNT_ID="000000000000" \
-    --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
-    --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
-    --env AWS_DEFAULT_REGION="us-east-1" \
-    --env AWS_S3_ENDPOINT="http://localstack:4566" \
-    --env AWS_SECRET_ACCESS_KEY="test" \
-    --env AWS_SESSION_TOKEN="test" \
-    --env CORS_ORIGINS="*" \
-    --env ENVIRONMENT="testing" \
-    --name "file-service-testing" \
-    --publish "5001:5000" \
-    --volume "./test/:/test/" \
-    file-service:testing \
-    "python" "-m" "unittest" "discover" "--start-directory" "/test/"
-```
+Unit testing and integration testing have been integrated into the GitHub Actions pipelines and only happen there. Due to the fact that the project focuses on utilizing AWS services, manually running the test scripts locally without proper fixtures will not be sufficient.
 
 ## Production
 
