@@ -32,7 +32,6 @@ jobs:
           SNAPSHOT_FLUSH_INTERVAL: 15
           SNAPSHOT_LOAD_STRATEGY: ON_REQUESTED
           SNAPSHOT_SAVE_STRATEGY: SCHEDULED
-        options: --entrypoint /usr/bin/env
 
     steps:
       - name: Checkout code
