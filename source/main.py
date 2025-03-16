@@ -73,10 +73,10 @@ def create_main():
     flask_cors.CORS(
         app=main,
         allow_headers=main.config.get("CORS_ORIGINS"),
-        allow_wildcard=True,
         max_age=3600,
         methods=["DELETE", "GET", "HEAD", "POST", "PUT"],
         origins=["*"],
+        send_wildcard=True,
     )
 
     main.register_blueprint(blueprint=source.route.file.blueprint)
