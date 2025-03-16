@@ -1,6 +1,7 @@
 # pylint: skip-file
 
 import io
+import logging
 import test
 import unittest
 
@@ -25,10 +26,10 @@ class TestFile(test.BaseTestCase):
 
     def tearDown(self):
         response = self.s3.list_objects_v2(Bucket=BUCKET)
-        print(response)
+        logging.warning(response)
         if "Contents" in response:
             for content in response["Contents"]:
-                print(content)
+                logging.warning(content)
                 self.s3.delete_object(Bucket=BUCKET, Key=content["Key"])
 
     def test_upload_file(self):
