@@ -25,14 +25,27 @@ jobs:
       - name: Build and export
         uses: docker/build-push-action@v6
         with:
-          tags: $DOCKER_IMAGE_FLASK:latest
-          outputs: type=docker,dest=${{ runner.temp }}/$DOCKER_IMAGE_FLASK.tar
+          tags: ${{ env.DOCKER_IMAGE_FLASK }}
+          outputs: type=docker,dest=${{ runner.temp }}/${{ env.DOCKER_IMAGE_FLASK }}.tar
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: $DOCKER_IMAGE_FLASK
-          path: ${{ runner.temp }}/$DOCKER_IMAGE_FLASK.tar
+          name: ${{ env.DOCKER_IMAGE_FLASK }}
+          path: ${{ runner.temp }}/${{ env.DOCKER_IMAGE_FLASK }}.tar
+
+  # lint:
+  #   runs-on: ubuntu-latest
+  #   needs: build
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Download artifact
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: ${{ env.DOCKER_IMAGE_FLASK }}
 
   test:
     runs-on: ubuntu-latest
@@ -67,11 +80,11 @@ jobs:
       - name: Download artifact
         uses: actions/download-artifact@v4
         with:
-          name: $DOCKER_IMAGE_FLASK
+          name: ${{ env.DOCKER_IMAGE_FLASK }}
           path: ${{ runner.temp }}
 
       - name: Load Docker image
-        run: docker load --input ${{ runner.temp }}/$DOCKER_IMAGE_FLASK.tar
+        run: docker load --input ${{ runner.temp }}/${{ env.DOCKER_IMAGE_FLASK }}.tar
 
       - name: Run Docker container to test
         run: >
@@ -90,5 +103,5 @@ jobs:
             --publish "5001:5000" \
             --volume "./test/:/test/" \
             --network host \
-            $DOCKER_IMAGE_FLASK \
+            ${{ env.DOCKER_IMAGE_FLASK }} \
             "python" "-m" "unittest" "discover" "--start-directory" "/test/"
