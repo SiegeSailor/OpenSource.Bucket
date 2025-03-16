@@ -31,13 +31,16 @@ The varaibles below have been wrapped in development and automation tools, such 
 | `ENVIRONMENT`                   | Accept [`development`](#development), [`testing`](#testing), and [`production`](#production).                                                                                                   |
 | `LOCALSTACK_AUTH_TOKEN`         | Serving this enables the LocalStack dashboard communicating with the local environment. The token is available on [LocalStack Auth Tokens](https://app.localstack.cloud/workspace/auth-tokens). |
 
+## Development
+
+Configure a local development environment using Docker Compose.
+
 ## Prerequesites
 
 - Docker: `Docker version 28.0.1, build 068a01e`
+- Terraform: `Terraform v1.11.2`
 
-## Development
-
-Configure a local development environment using Docker Compose. Create a `.env` in the root directory:
+Create a `.env` in the root directory:
 
 ```conf
 AWS_ACCESS_KEY_ID=dummy

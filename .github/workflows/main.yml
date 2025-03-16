@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE_FLASK_TESTING: flask-in-house
+  DOCKER_IMAGE_FLASK_TESTING: flask
 
 jobs:
   build:
