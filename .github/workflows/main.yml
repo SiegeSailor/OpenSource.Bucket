@@ -43,7 +43,7 @@ jobs:
             .
       - name: Run Docker container to test
         run: >
-          docker run --interactive --tty --rm \
+          docker run --rm \
             --env AWS_ACCESS_KEY_ID="dummy" \
             --env AWS_ACCOUNT_ID="000000000000" \
             --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
