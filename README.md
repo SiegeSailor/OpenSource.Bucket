@@ -44,9 +44,9 @@ Configure a local development environment using Docker Compose. Create a `.env` 
 AWS_ACCESS_KEY_ID=dummy
 AWS_ACCOUNT_ID=000000000000
 AWS_CLOUDWATCH_LOGS_ENDPOINT=http://localstack:4566
-AWS_CLOUDWATCH_LOGS_LOG_GROUP=bucket
+AWS_CLOUDWATCH_LOGS_LOG_GROUP=file-service
 AWS_DEFAULT_REGION=us-east-1
-AWS_S3_BUCKET=bucket
+AWS_S3_BUCKET=file-service
 AWS_S3_ENDPOINT=http://localstack:4566
 AWS_SECRET_ACCESS_KEY=test
 AWS_SESSION_TOKEN=test
@@ -103,7 +103,7 @@ Build the testing Docker image. The `--build-arg` values are described in [Confi
 
 ```bash
 docker build \
-    --tag "bucket:testing" \
+    --tag "file-service:testing" \
     .
 ```
 
@@ -114,19 +114,29 @@ docker run --interactive --tty --rm \
     --env AWS_ACCESS_KEY_ID="dummy" \
     --env AWS_ACCOUNT_ID="000000000000" \
     --env AWS_CLOUDWATCH_LOGS_ENDPOINT="http://localstack:4566" \
-    --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="test" \
+    --env AWS_CLOUDWATCH_LOGS_LOG_GROUP="file-service" \
     --env AWS_DEFAULT_REGION="us-east-1" \
-    --env AWS_S3_BUCKET="test" \
+    --env AWS_S3_BUCKET="file-service" \
     --env AWS_S3_ENDPOINT="http://localstack:4566" \
     --env AWS_SECRET_ACCESS_KEY="test" \
     --env AWS_SESSION_TOKEN="test" \
     --env CORS_ORIGINS="*" \
     --env ENVIRONMENT="testing" \
-    --name "bucket-testing" \
+    --name "file-service-testing" \
     --publish "5001:5000" \
     --volume "./test/:/test/" \
-    bucket:testing \
+    file-service:testing \
     "python" "-m" "unittest" "discover" "--start-directory" "/test/"
 ```
 
 ## Production
+
+## Miscellaneous
+
+Some improvement to make to shape this project structure more meaningful:
+
+- Logs format
+- Routes and directory naming, including Dockerfile, Docker commands, test files
+- Plain file structure
+- CloudWatch Logs logger handler creation condition
+- File uploading should be a PUT method

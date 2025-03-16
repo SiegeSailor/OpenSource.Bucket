@@ -41,14 +41,12 @@ def register_client(main: flask.Flask):
         stream="service",
         client=main.config.get("client_logs"),
         name="service",
-        is_connecting_cloud=not main.config.get("TESTING"),
     )
     main.config["logger_default"] = aws.create_logger(
         group=main.config.get("AWS_CLOUDWATCH_LOGS_LOG_GROUP"),
         stream="default",
         client=main.config.get("client_logs"),
         name=None,
-        is_connecting_cloud=not main.config.get("TESTING"),
     )
 
 

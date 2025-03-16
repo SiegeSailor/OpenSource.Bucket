@@ -56,7 +56,7 @@ def generate_url(bucket, filename):
 
 @blueprint.route("/<bucket>/<filename>", methods=["DELETE"])
 @source.decorator.format_response
-def delete(bucket, filename):
+def delete_file(bucket, filename):
     """
     Deletes a file from the specified bucket.
     """

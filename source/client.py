@@ -58,7 +58,6 @@ class AWS:
         :param str group: The name of the log group.
         :param str stream: The name of the log stream.
         :keyword str name: The name of the logger. Use the default logger if `None`.
-        :keyword bool is_connecting_cloud: Whether the logger is connecting to CloudWatch Logs.
         :return: The logger.
         :rtype: logging.Logger
         """
@@ -66,15 +65,14 @@ class AWS:
         logs_logger = logging.getLogger(kwargs.get("name"))
         logs_logger.setLevel(logging.INFO)
         logs_logger.addHandler(logging.StreamHandler())
-        if kwargs.get("is_connecting_cloud"):
-            logs_logger.addHandler(
-                watchtower.CloudWatchLogHandler(
-                    log_group_name=group,
-                    log_stream_name=stream,
-                    create_log_group=True,
-                    create_log_stream=True,
-                    boto3_client=client,
-                )
+        logs_logger.addHandler(
+            watchtower.CloudWatchLogHandler(
+                log_group_name=group,
+                log_stream_name=stream,
+                create_log_group=True,
+                create_log_stream=True,
+                boto3_client=client,
             )
+        )
 
         return logs_logger
