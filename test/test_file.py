@@ -15,12 +15,12 @@ class TestFile(test.BaseTestCase):
     def setUp(self):
         self.client = boto3.client(
             "s3",
-            access_key_id=self.main.config.get("AWS_ACCESS_KEY_ID"),
-            account_id=self.main.config.get("AWS_ACCOUNT_ID"),
+            aws_access_key_id=self.main.config.get("AWS_ACCESS_KEY_ID"),
+            aws_account_id=self.main.config.get("AWS_ACCOUNT_ID"),
             endpoint_url=self.main.config.get("AWS_S3_ENDPOINT"),
             region_name=self.main.config.get("AWS_DEFAULT_REGION"),
-            secret_access_key=self.main.config.get("AWS_SECRET_ACCESS_KEY"),
-            session_token=self.main.config.get("AWS_SESSION_TOKEN"),
+            aws_secret_access_key=self.main.config.get("AWS_SECRET_ACCESS_KEY"),
+            aws_session_token=self.main.config.get("AWS_SESSION_TOKEN"),
         )
 
     def tearDown(self):
