@@ -69,7 +69,7 @@ resource "aws_ecs_task_definition" "fileservice_task" {
   container_definitions    = jsonencode([
     {
       name  = "fileservice-container"
-      image = "${aws_ecr_repository.fileservice.repository_url}.amazonaws.com:latest"
+      image = "${aws_ecr_repository.fileservice.repository_url}.amazonaws.com/fileservice:latest"
       essential = true
       portMappings = [
         {
