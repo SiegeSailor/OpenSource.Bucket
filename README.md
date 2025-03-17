@@ -102,14 +102,15 @@ Unit testing and integration testing have been integrated into the GitHub Action
 ## Production
 
 ```bash
-docker build --tag  .
+docker build --tag fileservice:latest .
+terraform init
 terraform apply \
   -var "environment=production" \
-  -var "aws_access_key_id=<your-aws-access-key-id>" \
-  -var "aws_account_id=<you-aws-account-id>" \
+  -var "aws_access_key_id=<your_aws_access_key_id>" \
+    -var "aws_secret_access_key=<your_aws_secret_access_key>" \
+  -var "aws_account_id=<your_aws_account_id>" \
   -var "aws_cloudwatch_logs_log_group=file-service" \
   -var "aws_default_region=us-east-1" \
-  -var "aws_secret_access_key=<your-aws-secret-access-key>" \
   -var "cors_origins=*" \
   -var "flask_app=main:create_main" \
   -var "aws_cloudwatch_logs_log_group=file-service" \
@@ -159,3 +160,4 @@ Some improvement to make to shape this project structure more meaningful. Yet, n
 - Prefix for bucket names
 - Module Terraform files
 - Automate Terraform
+- Automated linting and formatting

@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DOCKER_IMAGE_FLASK: flask
+  DOCKER_IMAGE_FLASK: fileservice
 
 jobs:
   build:
@@ -33,19 +33,6 @@ jobs:
         with:
           name: ${{ env.DOCKER_IMAGE_FLASK }}
           path: ${{ runner.temp }}/${{ env.DOCKER_IMAGE_FLASK }}.tar
-
-  # lint:
-  #   runs-on: ubuntu-latest
-  #   needs: build
-
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-
-  #     - name: Download artifact
-  #       uses: actions/download-artifact@v4
-  #       with:
-  #         name: ${{ env.DOCKER_IMAGE_FLASK }}
 
   test:
     runs-on: ubuntu-latest

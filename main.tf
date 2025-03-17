@@ -4,18 +4,18 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
 }
 
-resource "aws_vpc" "my_vpc" {
+resource "aws_vpc" "fileservice_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
-resource "aws_subnet" "my_subnet" {
-  vpc_id            = aws_vpc.my_vpc.id
+resource "aws_subnet" "fileservice_subnet" {
+  vpc_id            = aws_vpc.fileservice_vpc.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "us-east-1a"
 }
 
-resource "aws_security_group" "my_security_group" {
-  vpc_id = aws_vpc.my_vpc.id
+resource "aws_security_group" "fileservice_security_group" {
+  vpc_id = aws_vpc.fileservice_vpc.id
 
   ingress {
     from_port   = 5000
@@ -32,8 +32,8 @@ resource "aws_security_group" "my_security_group" {
   }
 }
 
-resource "aws_ecs_cluster" "my_cluster" {
-  name = "my-cluster"
+resource "aws_ecs_cluster" "fileservice_cluster" {
+  name = "fileservice-cluster"
 }
 
 resource "aws_iam_role" "ecs_task_execution" {
@@ -55,8 +55,8 @@ resource "aws_iam_role" "ecs_task_execution" {
   ]
 }
 
-resource "aws_ecs_task_definition" "my_task" {
-  family                   = "my-task"
+resource "aws_ecs_task_definition" "fileservice_task" {
+  family                   = "fileservice-task"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = "256"
@@ -64,8 +64,8 @@ resource "aws_ecs_task_definition" "my_task" {
   execution_role_arn       = aws_iam_role.ecs_task_execution.arn
   container_definitions    = jsonencode([
     {
-      name  = "my-container"
-      image = "my-docker-image:latest"
+      name  = "fileservice-container"
+      image = "fileservice:latest"
       essential = true
       portMappings = [
         {
@@ -76,7 +76,7 @@ resource "aws_ecs_task_definition" "my_task" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"        = "my-log-group"
+          "awslogs-group"        = "fileservice-log-group"
           "awslogs-region"       = "us-east-1"
           "awslogs-stream-prefix"= "ecs"
         }
@@ -123,16 +123,16 @@ resource "aws_ecs_task_definition" "my_task" {
   ])
 }
 
-resource "aws_ecs_service" "my_service" {
-  name            = "my-service"
-  cluster         = aws_ecs_cluster.my_cluster.id
-  task_definition = aws_ecs_task_definition.my_task.arn
+resource "aws_ecs_service" "fileservice_service" {
+  name            = "fileservice-service"
+  cluster         = aws_ecs_cluster.fileservice_cluster.id
+  task_definition = aws_ecs_task_definition.fileservice_task.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = [aws_subnet.my_subnet.id]
-    security_groups = [aws_security_group.my_security_group.id]
+    subnets         = [aws_subnet.fileservice_subnet.id]
+    security_groups = [aws_security_group.fileservice_security_group.id]
     assign_public_ip = true
   }
 }
