@@ -12,6 +12,20 @@ resource "aws_vpc" "fileservice_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
+resource "aws_vpc_endpoint" "ecr" {
+  vpc_id       = aws_vpc.fileservice_vpc.id
+  service_name = "com.amazonaws.us-east-1.ecr.api"
+  subnet_ids   = [aws_subnet.fileservice_subnet.id]
+  security_group_ids = [aws_security_group.fileservice_security_group.id]
+}
+
+resource "aws_vpc_endpoint" "ecr_docker" {
+  vpc_id       = aws_vpc.fileservice_vpc.id
+  service_name = "com.amazonaws.us-east-1.ecr.dkr"
+  subnet_ids   = [aws_subnet.fileservice_subnet.id]
+  security_group_ids = [aws_security_group.fileservice_security_group.id]
+}
+
 resource "aws_subnet" "fileservice_subnet" {
   vpc_id            = aws_vpc.fileservice_vpc.id
   cidr_block        = "10.0.1.0/24"
