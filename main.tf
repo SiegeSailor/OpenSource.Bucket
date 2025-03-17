@@ -1,5 +1,35 @@
 provider "aws" {
-  region = "us-east-1"
+  region     = "us-east-1"
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
+}
+
+resource "aws_vpc" "my_vpc" {
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_subnet" "my_subnet" {
+  vpc_id            = aws_vpc.my_vpc.id
+  cidr_block        = "10.0.1.0/24"
+  availability_zone = "us-east-1a"
+}
+
+resource "aws_security_group" "my_security_group" {
+  vpc_id = aws_vpc.my_vpc.id
+
+  ingress {
+    from_port   = 5000
+    to_port     = 5000
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_ecs_cluster" "my_cluster" {
@@ -65,10 +95,6 @@ resource "aws_ecs_task_definition" "my_task" {
           value = var.aws_account_id
         },
         {
-          name  = "AWS_CLOUDWATCH_LOGS_ENDPOINT"
-          value = var.aws_cloudwatch_logs_endpoint
-        },
-        {
           name  = "AWS_CLOUDWATCH_LOGS_LOG_GROUP"
           value = var.aws_cloudwatch_logs_log_group
         },
@@ -77,16 +103,8 @@ resource "aws_ecs_task_definition" "my_task" {
           value = var.aws_default_region
         },
         {
-          name  = "AWS_S3_ENDPOINT"
-          value = var.aws_s3_endpoint
-        },
-        {
           name  = "AWS_SECRET_ACCESS_KEY"
           value = var.aws_secret_access_key
-        },
-        {
-          name  = "AWS_SESSION_TOKEN"
-          value = var.aws_session_token
         },
         {
           name  = "CORS_ORIGINS"
@@ -101,9 +119,6 @@ resource "aws_ecs_task_definition" "my_task" {
           value = var.flask_debug
         }
       ]
-      depends_on = [
-        "localstack"
-      ]
     }
   ])
 }
@@ -116,8 +131,9 @@ resource "aws_ecs_service" "my_service" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = ["subnet-12345678"]
-    security_groups = ["sg-12345678"]
+    subnets         = [aws_subnet.my_subnet.id]
+    security_groups = [aws_security_group.my_security_group.id]
+    assign_public_ip = true
   }
 }
 
@@ -136,11 +152,6 @@ variable "aws_account_id" {
   type        = string
 }
 
-variable "aws_cloudwatch_logs_endpoint" {
-  description = "AWS CloudWatch Logs Endpoint"
-  type        = string
-}
-
 variable "aws_cloudwatch_logs_log_group" {
   description = "AWS CloudWatch Logs Log Group"
   type        = string
@@ -151,18 +162,8 @@ variable "aws_default_region" {
   type        = string
 }
 
-variable "aws_s3_endpoint" {
-  description = "AWS S3 Endpoint"
-  type        = string
-}
-
 variable "aws_secret_access_key" {
   description = "AWS Secret Access Key"
-  type        = string
-}
-
-variable "aws_session_token" {
-  description = "AWS Session Token"
   type        = string
 }
 

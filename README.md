@@ -1,6 +1,6 @@
 # Overview
 
-This is a backend service project that provides a RESTful interface for AWS S3 using Flask. Following the Microservices Principle, this project has been wrapped with Docker, LocalStack, and Terraform to isolate the running/deploying environments with a fully configurable layer that support development on the local laptops, testing in CI/CD pipelines, and deployment to the AWS services.
+This is a backend service project that provides a RESTful interface for AWS S3 using Flask. Following the Microservices Principle, this project has been wrapped with Docker, LocalStack, and Terraform to isolate the running/deploying-environments with a fully configurable layer that support development on the local laptops, testing in CI/CD pipelines, and deployment to the AWS services.
 
 ## RESTful Interface
 
@@ -28,12 +28,12 @@ The varaibles below have been wrapped in development and automation tools, such 
 | `AWS_SECRET_ACCESS_KEY`         | The secret access key of AWS. It is available on [AWS Account Overview](https://console.aws.amazon.com/).                                                                                       |
 | `AWS_SESSION_TOKEN`             | The session token of AWS. It is available with [AWS STS](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_temp.html).                                                            |
 | `CORS_ORIGINS`                  | Allowed origins for Flask. This is a string separated with `,` and doesn't work with pre-signed URLs.                                                                                           |
-| `ENVIRONMENT`                   | Accept [`development`](#development), [`testing`](#testing), and [`production`](#production).                                                                                                   |
+| `ENVIRONMENT`                   | Accept `development`, `testing`, and `production`.                                                                                                                                              |
 | `LOCALSTACK_AUTH_TOKEN`         | Serving this enables the LocalStack dashboard communicating with the local environment. The token is available on [LocalStack Auth Tokens](https://app.localstack.cloud/workspace/auth-tokens). |
 
 ## Development
 
-Configure a local development environment using Docker Compose.
+Configure a local development environment.
 
 ## Prerequesites
 
@@ -95,16 +95,54 @@ flask-1       |  * Running on http://172.18.0.3:5000
 flask-1       | INFO:werkzeug:Press CTRL+C to quit
 ```
 
-```bash
-export AWS_ACCESS_KEY_ID=AKIAYFU5B6WU4FY5PHNF
-export AWS_SECRET_ACCESS_KEY=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
-```
-
 ## Testing
 
 Unit testing and integration testing have been integrated into the GitHub Actions pipelines and only happen there. Due to the fact that the project focuses on utilizing AWS services, manually running the test scripts locally without proper fixtures will not be sufficient.
 
 ## Production
+
+```bash
+docker build --tag  .
+terraform apply \
+  -var "environment=production" \
+  -var "aws_access_key_id=<your-aws-access-key-id>" \
+  -var "aws_account_id=<you-aws-account-id>" \
+  -var "aws_cloudwatch_logs_log_group=file-service" \
+  -var "aws_default_region=us-east-1" \
+  -var "aws_secret_access_key=<your-aws-secret-access-key>" \
+  -var "cors_origins=*" \
+  -var "flask_app=main:create_main" \
+  -var "aws_cloudwatch_logs_log_group=file-service" \
+  -var "flask_debug=1"
+```
+
+### Destroy Resources
+
+```terraform
+provider "aws" {
+  region = "us-east-1"
+  access_key = var.aws_access_key_id
+  secret_key = var.aws_secret_access_key
+}
+
+
+variable "aws_access_key_id" {
+  description = "AWS Access Key ID"
+  type        = string
+}
+
+variable "aws_secret_access_key" {
+  description = "AWS Secret Access Key"
+  type        = string
+}
+```
+
+```bash
+terraform init
+terraform apply \
+  -var "aws_access_key_id=<your-aws_access_key_id>"
+  -var "aws_secret_access_key=<your-aws_secret_access_key>"
+```
 
 ## Miscellaneous
 
@@ -119,3 +157,5 @@ Some improvement to make to shape this project structure more meaningful. Yet, n
 - Test result generation
 - Pipeline and version badges
 - Prefix for bucket names
+- Module Terraform files
+- Automate Terraform
