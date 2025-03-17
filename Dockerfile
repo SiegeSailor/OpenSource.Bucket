@@ -13,3 +13,5 @@ RUN pip install --no-cache-dir --requirement ./requirements.txt
 COPY ./source/ /source/
 
 WORKDIR /
+
+CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]

@@ -101,20 +101,24 @@ Unit testing and integration testing have been integrated into the GitHub Action
 
 ## Production
 
+Create a `terraform.tfvars` file in the root directory:
+
+```conf
+aws_access_key_id     = "<your_aws_access_key_id>"
+aws_secret_access_key = "<your_aws_secret_access_key>"
+aws_account_id        = "<your_aws_account_id>"
+aws_cloudwatch_logs_log_group = "fileservice_log_group"
+aws_default_region    = "us-east-1"
+environment           = "development"
+cors_origins          = "*"
+flask_app             = "main:create_main"
+flask_debug           = "1"
+```
+
 ```bash
 docker build --tag fileservice:latest .
 terraform init
-terraform apply \
-  -var "environment=production" \
-  -var "aws_access_key_id=<your_aws_access_key_id>" \
-    -var "aws_secret_access_key=<your_aws_secret_access_key>" \
-  -var "aws_account_id=<your_aws_account_id>" \
-  -var "aws_cloudwatch_logs_log_group=file-service" \
-  -var "aws_default_region=us-east-1" \
-  -var "cors_origins=*" \
-  -var "flask_app=main:create_main" \
-  -var "aws_cloudwatch_logs_log_group=file-service" \
-  -var "flask_debug=1"
+terraform apply
 ```
 
 ### Destroy Resources
