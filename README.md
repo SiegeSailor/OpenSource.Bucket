@@ -115,9 +115,27 @@ flask_app             = "main:create_main"
 flask_debug           = "1"
 ```
 
+Apply the changes:
+
 ```bash
-docker build --tag fileservice:latest .
 terraform init
+terraform apply
+```
+
+The changes include the ECR creation. You will have to manually push the Docker to it:
+
+```bash
+export REGION=""
+export AWS_ACCOUNT_ID=""
+docker build --tag fileservice:latest .
+docker tag fileservice:latest $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/fileservice:latest
+aws ecr get-login-password --region $REGION --profile default | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/fileservice:latest
+```
+
+Apply the changes again:
+
+```bash
 terraform apply
 ```
 

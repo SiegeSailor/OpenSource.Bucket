@@ -4,6 +4,10 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
 }
 
+resource "aws_ecr_repository" "fileservice" {
+  name = "fileservice"
+}
+
 resource "aws_vpc" "fileservice_vpc" {
   cidr_block = "10.0.0.0/16"
 }
@@ -65,7 +69,7 @@ resource "aws_ecs_task_definition" "fileservice_task" {
   container_definitions    = jsonencode([
     {
       name  = "fileservice-container"
-      image = "fileservice:latest"
+      image = "${aws_ecr_repository.fileservice.repository_url}.amazonaws.com:latest"
       essential = true
       portMappings = [
         {
@@ -77,7 +81,7 @@ resource "aws_ecs_task_definition" "fileservice_task" {
         logDriver = "awslogs"
         options = {
           "awslogs-group"        = "fileservice-log-group"
-          "awslogs-region"       = "us-east-1"
+          "awslogs-region"       = "${var.aws_default_region}"
           "awslogs-stream-prefix"= "ecs"
         }
       }
