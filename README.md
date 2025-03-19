@@ -183,3 +183,5 @@ Some improvement to make to shape this project structure more meaningful. Yet, n
 - Module Terraform files
 - Automate Terraform
 - Automated linting and formatting
+- Trustable Services
+- Production configuration
